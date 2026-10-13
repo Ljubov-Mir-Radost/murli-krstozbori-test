@@ -1,0 +1,30 @@
+{
+  "name": "Мурли Крстозбори — ТЕСТ",
+  "short_name": "Мурли ТЕСТ",
+  "description": "Пробна апликација за проверка пред објавување.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "lang": "mk",
+  "categories": [
+    "education",
+    "games"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

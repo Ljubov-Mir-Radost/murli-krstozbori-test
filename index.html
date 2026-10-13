@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="mk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111111">
+<title>Мурли Крстозбори — ТЕСТ</title>
+<style>
+:root{
+ --bg:#0d0f14;--panel:#171a21;--panel2:#1e222b;--text:#f7f8fb;--muted:#c4c9d3;
+ --line:#59616e;--cell:#252a33;--black:#080a0e;--active:#255ed8;--focus:#ffd34d;
+ --good:#2dbb7a;--bad:#d94d5c;--accent:#ffd34d;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans",sans-serif}
+body{min-height:100vh;overflow-x:hidden;overflow-y:auto}
+button{font:inherit;color:inherit;font-weight:800;cursor:pointer}
+header{padding:13px 12px 9px;text-align:center;border-bottom:1px solid #292e38}
+h1{font-size:21px;line-height:1.1;margin:0;font-weight:900;letter-spacing:.3px}
+.subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+main{width:min(100%,560px);min-height:100dvh;margin:auto;padding:5px 8px 10px;display:flex;flex-direction:column;overflow:visible}
+.panel{background:var(--panel);border:1px solid #353b46;border-radius:15px;padding:6px;margin:3px 0;flex:none}
+.intro-text{font-weight:900;line-height:1.35;font-size:14px}.intro{display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:13px;line-height:1.3}.intro span{color:var(--muted)}.current{padding:8px 10px}
+.current-top{display:flex;align-items:center;gap:9px}
+.badge{background:var(--accent);color:#111;padding:4px 8px;border-radius:7px;font-weight:950;min-width:32px;text-align:center}
+.direction{font-size:12px;color:var(--muted);font-weight:800}
+.current-clue{font-size:16px;font-weight:900;line-height:1.2;margin:5px 0}
+.pattern{display:flex;align-items:center;gap:3px;flex-wrap:wrap;min-height:27px}
+.pbox{width:23px;height:26px;border-bottom:3px solid var(--muted);text-align:center;font-size:19px;font-weight:950;line-height:23px}
+.pbox.selected{border-color:var(--focus);color:var(--focus)}
+.length{font-size:12px;color:var(--muted);margin-left:5px}
+#grid{
+ display:grid;gap:2px;justify-content:center;align-content:center;
+ margin:0 auto 0;
+ width:min(100%,430px);
+ touch-action:manipulation;
+}
+.cell{aspect-ratio:1;position:relative}
+.cell.black{background:var(--black);border-radius:3px}
+.cell input{
+ width:100%;height:100%;padding:0;border:2px solid #69717d;border-radius:4px;
+ background:var(--cell);color:#fff;text-align:center;text-transform:uppercase;
+ font-size:clamp(18px,5.8vw,28px);font-weight:950;outline:none;
+}
+.cell input.active{background:var(--active);border-color:var(--focus);box-shadow:0 0 0 2px #fff}
+.cell input.good{background:var(--good);color:#06170f;border-color:#d8ffe9}
+.cell input.bad{background:var(--bad);color:#fff;border-color:#ffd5d9}
+.cell .number{position:absolute;top:1px;left:2px;font-size:9px;line-height:9px;font-weight:950;color:#dce2ec;pointer-events:none;z-index:2}
+.grid-tools{display:grid;grid-template-columns:auto auto minmax(0,1fr) 38px;gap:5px;align-items:stretch;margin-top:2px}
+.grid-tools .tool{min-width:0;white-space:nowrap}
+.grid-tools .archive-mini{width:38px;padding:6px 0;text-align:center;font-size:18px}
+.tool{background:var(--panel2);border:1px solid #68717f;border-radius:9px;padding:6px 9px;min-height:32px;font-size:13px}
+.tool.primary{background:#254c99;border-color:#8faeff}
+#status{text-align:center;min-height:0;font-size:12px;font-weight:850;margin:2px 0 0}
+.auto-next-option{display:flex;align-items:center;gap:7px;min-height:32px;font-size:12px;font-weight:750;cursor:pointer}
+.auto-next-option input{width:18px;height:18px;margin:0;accent-color:var(--accent);flex:none}
+#autoNextNotice{min-height:17px;font-size:12px;line-height:17px;color:var(--accent);font-weight:800}
+.keyboard-panel{padding:6px;margin-top:3px}
+.keyboard-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.keyboard-title strong{font-size:15px}
+.keyboard-title span{font-size:11px;color:var(--muted)}
+.keyboard{display:flex;flex-direction:column;gap:3px}
+.keyRow{display:grid;gap:4px}
+.keyRow.row1{grid-template-columns:repeat(12,1fr)}
+.keyRow.row2{grid-template-columns:repeat(11,1fr);padding:0 4%}
+.keyRow.row3{grid-template-columns:repeat(8,1fr);padding:0 17%}
+.key{min-width:0;height:38px;padding:0;background:#3b3c40;color:#000;border:1px solid #777;border-radius:7px;font-size:17px;font-weight:950}
+.key:active{transform:scale(.96);background:var(--focus)}
+.keyboard-actions{display:flex;gap:5px;margin-top:4px}
+.keyboard-actions .key{height:36px;flex:1;font-size:14px}
+details{background:var(--panel);border:1px solid #353b46;border-radius:15px;margin:8px 0;overflow:hidden}
+summary{padding:11px 12px;font-weight:900;cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"＋";float:right;color:var(--accent)}
+details[open] summary:after{content:"−"}
+.clues{padding:0 9px 9px}
+.tabs{display:flex;gap:5px;margin-bottom:6px}
+.tab{flex:1;background:var(--panel2);border:1px solid #56606d;border-radius:8px;padding:7px;font-size:12px}
+.tab.active{background:#2b4e92;border-color:#91adff}
+.clue{
+ display:grid;grid-template-columns:30px 1fr auto;gap:7px;align-items:center;
+ background:var(--panel2);border:1px solid #353c48;border-radius:9px;
+ padding:8px 7px;margin:5px 0;cursor:pointer;
+}
+.clue.active{border-color:var(--focus);box-shadow:inset 3px 0 0 var(--focus)}
+.clue-num{font-weight:950;color:var(--accent);text-align:center}
+.clue-text{font-size:13px;line-height:1.2}
+.clue-len{font-size:11px;color:var(--muted);white-space:nowrap;font-weight:800}
+.access{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:5px;padding-bottom:2px}.keyboard .key .keyLetter{display:block;line-height:1}
+.keyboard-panel .keyboard .keySvg{display:block;width:100%;height:100%;overflow:visible;forced-color-adjust:none !important;color-scheme:light !important}.keyboard-panel .keyboard .keySvg text{fill:#000000 !important;stroke:none !important}
+.keyboard-panel .keyboard .keyLetter{
+  display:block !important;
+  color:#000000 !important;
+  -webkit-text-fill-color:#000000 !important;
+  font-weight:950 !important;
+  font-family:system-ui,-apple-system,"Noto Sans",sans-serif !important;
+  forced-color-adjust:none !important;
+}
+.keyboard-panel .keyboard .key{
+  appearance:none !important;
+  -webkit-appearance:none !important;
+  forced-color-adjust:none !important;
+  color-scheme:light !important;
+}
+.keyboard-panel .keyboard .key:not(.delete){
+  background:#FFF200 !important;
+  background-color:#FFF200 !important;
+  border:2px solid #000 !important;
+  color:#000 !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+}
+.keyboard-panel .keyboard .key:not(.delete):active{
+  background:#FFF200 !important;
+  background-color:#FFF200 !important;
+}
+.keyboard-panel .keyboard-actions .key{
+  background:#fff !important;
+  background-color:#fff !important;
+  color:#000 !important;
+  border:2px solid #000 !important;
+}
+.keyboard-panel .keyboard-actions .key span{
+  color:#000 !important;
+  -webkit-text-fill-color:#000 !important;
+}
+@media(max-width:370px){
+ .grid-tools{gap:4px}.grid-tools .tool{padding:5px 7px;font-size:12px}.grid-tools .archive-mini{width:36px;padding:5px 0;font-size:17px}
+ .intro-text{font-weight:900;line-height:1.35;font-size:14px}.intro{font-size:12px}.intro .tool{font-size:11px;padding:7px 8px}
+ main{padding-left:7px;padding-right:7px}
+ .keyboard{gap:4px}.key{height:38px;font-size:16px}
+ .current-clue{font-size:15px}
+ .clue-text{font-size:12px}
+}
+
+
+.questions-btn{margin-top:4px;flex:1}
+#questionsModal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:10px}
+#questionsModal.open{display:flex}
+.questions-sheet{width:min(100%,560px);max-height:78dvh;background:var(--panel);border:1px solid #59616e;border-radius:18px;padding:10px;overflow:auto}
+.questions-head{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--panel);padding-bottom:7px;z-index:2}
+.questions-head strong{font-size:17px}
+.close-questions{background:var(--panel2);border:1px solid #68717f;border-radius:9px;padding:7px 11px}
+.clue{grid-template-columns:32px 1fr auto}
+@media(max-height:700px){.current-clue{font-size:14px}.key{height:32px;font-size:15px}.keyboard-actions .key{height:29px}.current{padding:6px 9px}.panel{padding:5px;margin:3px 0}.keyboard-panel{padding:5px}.grid-tools .tool{padding:5px 8px;min-height:30px}.access{margin-top:4px}}
+
+.home-screen{display:none;min-height:100dvh;padding:18px 12px 24px}
+.home-screen.show{display:block}
+.home-wrap{width:min(100%,560px);margin:auto}
+.home-title{font-size:26px;font-weight:950;text-align:center;margin:4px 0 2px}
+.home-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px}
+.home-card{background:var(--panel);border:1px solid #353b46;border-radius:16px;padding:12px;margin:8px 0}
+.home-year{font-size:20px;font-weight:950;margin-bottom:8px}
+.month-title{font-size:15px;font-weight:900;color:var(--accent);margin:12px 0 6px}
+.archive-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.archive-item{background:var(--panel2);border:1px solid #56606d;border-radius:10px;padding:10px 5px;text-align:center;font-weight:900;font-size:14px}
+.archive-item:active{transform:scale(.97)}
+.home-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.home-action{background:var(--panel2);border:1px solid #68717f;border-radius:11px;padding:11px 8px;font-size:14px}
+.home-action.primary{background:#254c99;border-color:#8faeff}
+.import-help{font-size:12px;color:var(--muted);line-height:1.35;margin-top:8px}
+.file-input{display:none}
+@media(max-width:370px){.archive-grid{grid-template-columns:repeat(3,1fr)}.home-title{font-size:23px}}
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+
+<style id="pwa-install-style">
+#pwaInstallBtn{
+  display:none; margin:8px auto 0; width:max-content; max-width:calc(100vw - 32px);
+  padding:9px 14px; border:1px solid #444; border-radius:10px;
+  background:#222; color:#fff; font:600 14px/1.1 system-ui,sans-serif;
+}
+#pwaInstallBtn.show{display:block}
+</style>
+<style id="v16-maintenance-style">
+#updateBanner{display:none;position:fixed;top:6px;left:8px;right:8px;z-index:110;
+ max-width:560px;margin:auto;padding:9px 10px;border:2px solid var(--accent);
+ border-radius:11px;background:#191d25;box-shadow:0 4px 20px #000b;
+ font-size:13px;align-items:center;gap:9px;justify-content:space-between}
+#updateBanner.show{display:flex}
+#updateBanner button{background:var(--panel2);border:1px solid #858d9c;
+ border-radius:8px;padding:6px 9px;white-space:nowrap;font-size:12px}
+#updateBanner #updateNow{background:#254c99;border-color:#8faeff}
+#homeNotice{color:var(--accent);font-size:13px;line-height:1.4;margin:8px 0}
+</style>
+<style>
+body{min-height:100dvh}
+main{min-height:0}
+body.game-open #pwaInstallBtn{display:none}
+body.game-open #introPanel{position:fixed;inset:10px;z-index:100;display:block;overflow:auto;max-width:540px;margin:auto;background:var(--panel)}
+body.game-open #introPanel .intro-text{margin-bottom:15px}
+.cell input{font-size:clamp(17px,4.5vw,26px)}
+.keyboard-title{min-height:18px}
+.keyboard-title strong{font-size:14px;white-space:nowrap}
+.keyboard-title span{display:none}
+</style>
+</head>
+<body>
+<button id="pwaInstallBtn" type="button">📲 Инсталирај апликација</button>
+<div id="updateBanner" role="status" aria-live="polite">
+  <span>Достапна е нова верзија. Напредокот е зачуван.</span>
+  <button id="updateNow" type="button">Освежи</button>
+  <button id="updateLater" type="button">Подоцна</button>
+</div>
+
+<section class="home-screen show" id="homeScreen">
+  <div class="home-wrap">
+    <div class="home-title">МУРЛИ КРСТОЗБОРИ</div>
+    <div class="home-sub">ПРОБНА ВЕРЗИЈА · Проверка пред објавување</div>
+    <div class="home-card">
+      
+      <div id="archiveGrid">
+        <button class="archive-item" data-id="2026-10-01">10/1</button>
+      </div>
+      <div class="home-actions">
+        <button class="home-action primary" id="importBtn">＋ Увези крстозбори</button>
+        <button class="home-action" id="continueBtn">▶ Отвори 10/14</button>
+      </div>
+      <input class="file-input" id="fileInput" type="file" accept=".json,application/json">
+      <div class="import-help">
+        Може да се увезе еден JSON крстозбор или пакет со повеќе крстозбори.
+      </div>
+      <button class="home-action" id="syncBtn" type="button" style="width:100%;margin-top:10px">↻ Провери за нови крстозбори</button>
+      <div class="import-help" id="catalogueNotice" role="status" aria-live="polite">Новите крстозбори се преземаат автоматски кога има интернет.</div>
+      <div id="homeNotice" role="status" aria-live="polite"></div>
+      <div class="import-help">Компактен преглед · 5 прашања</div>
+    </div>
+  </div>
+</section>
+
+<main id="gameMain">
+<section class="panel intro" id="introPanel">
+  <div class="intro-text"><strong>Како се игра?</strong><br><strong>Избери поле во крстозборот и прочитај го прашањето. Обиди се да го најдеш решението и внеси го преку кириличната тастатура. По секоја буква автоматски се оди на следното празно или погрешно поле, прескокнувајќи ги точните букви. Кога ќе пополниш цел одговор, точните букви стануваат зелени, а погрешните црвени. „Провери“ ги проверува и делумно внесените одговори. Ако не можеш да го најдеш решението, притисни „Одговори“ за помош.</strong></div>
+  <button class="tool" id="introDone">Прочитав</button>
+</section>
+
+<section class="panel current" aria-live="polite">
+  <div class="current-top">
+    <span class="badge" id="currentNum">1</span>
+    <span class="direction" id="currentDir">ХОРИЗОНТАЛНО</span>
+    <span class="length" id="currentLen"></span>
+  </div>
+  <div class="current-clue" id="currentClue"></div>
+  <div class="pattern" id="pattern"></div>
+  <label class="auto-next-option"><input type="checkbox" id="autoNext" checked> Автоматски следно прашање</label>
+  <div id="autoNextNotice" role="status" aria-live="polite"></div>
+</section>
+
+
+<section class="panel">
+  <div id="grid" aria-label="Крстозбор 10/1"></div>
+  <div class="grid-tools">
+    <button class="tool primary" id="check">✓ Провери</button>
+    <button class="tool" id="clear">⌫ Испразни</button>
+    <button class="tool questions-btn" id="openQuestions">☰ Одговори</button>
+    <button class="tool archive-mini" id="archiveMini" aria-label="Архива" title="Архива">🗂</button>
+  </div>
+  <div id="status"></div>
+</section>
+
+<section class="panel keyboard-panel high-contrast">
+  <div class="keyboard-title">
+    <strong>Кирилична тастатура</strong>
+    <span>внеси → автоматски следно поле</span>
+  </div>
+  <div class="keyboard" id="keyboard"></div>
+  <div class="keyboard-actions">
+    <button class="key" id="back">← Назад</button>
+    <button class="key delete" id="del">⌫ Избриши</button>
+  </div>
+  
+</section>
+
+<div id="questionsModal" aria-hidden="true">
+ <div class="questions-sheet">
+  <div class="questions-head"><strong>Одговори</strong><button class="close-questions" id="closeQuestions">Затвори</button></div>
+  <div class="clues">
+   <div class="tabs">
+    <button class="tab active" data-tab="all">Сите</button>
+    <button class="tab" data-tab="across">Хоризонтално</button>
+    <button class="tab" data-tab="down">Вертикално</button>
+   </div>
+   <div id="clues"></div>
+  </div>
+ </div>
+</div>
+</main>
+
+<script>
+let ROWS=[
+"#######ПОРОЦИ",
+"#########А###",
+"#С#######Џ###",
+"ТЕЛО##Ч##А###",
+"#Ќ##Н#И##Ј###",
+"НАСЛЕДСТВО###",
+"#В##Б#Т##Г###",
+"ТАТКО#ОКЕАН##",
+"#Њ####Т######",
+"#Е####А######"
+];
+let ANSWERS=[
+{n:1,dir:"across",r:0,c:7,answer:"ПОРОЦИ",clue:"Што треба да ги предадете на Таткото наместо да им дозволите да ве победуваат?"},
+{n:2,dir:"down",r:0,c:9,answer:"РАЏАЈОГА",display:"РАЏА ЈОГА",clue:"Која јога се споменува како јога преку која се станува господар на кралството?"},
+{n:3,dir:"down",r:2,c:1,answer:"СЕЌАВАЊЕ",clue:"На кое духовно патување треба постојано да останеме?"},
+{n:4,dir:"across",r:3,c:0,answer:"ТЕЛО",clue:"Што треба да го надминеме за да ставиме крај на свеста за телото?"},
+{n:5,dir:"down",r:3,c:6,answer:"ЧИСТОТА",clue:"Што треба постојано да се одржува за да се достигне високото духовно наследство?"},
+{n:6,dir:"down",r:4,c:4,answer:"НЕБО",clue:"Како е опишана возвишената дестинација што следи по стекнувањето на наследството?"},
+{n:7,dir:"across",r:5,c:0,answer:"НАСЛЕДСТВО",clue:"Што го добиваат децата од Таткото?"},
+{n:8,dir:"across",r:7,c:0,answer:"ТАТКО",clue:"Од кого децата ја добиваат својата духовна наследба?"},
+{n:9,dir:"across",r:7,c:6,answer:"ОКЕАН",clue:"Каков е Таткото во однос на духовното знаење?"}
+];
+const BUILTIN_CROSSWORD={
+ id:"2026-10-01",year:2026,month:10,day:1,title:"10/1",
+ rows:ROWS.slice(),
+ clues:ANSWERS.map(a=>({...a}))
+};
+const BUILTIN_CROSSWORD_02={
+ id:"2026-10-02",year:2026,month:10,day:2,title:"10/2",
+ rows:[
+  "#######СВЕТ",
+  "ПОРОЦИ####А",
+  "##А####Ч##Т",
+  "##Џ#С##И##К",
+  "#НАСЛЕДСТВО",
+  "##Ј#У##Т###",
+  "##О#Ж##О###",
+  "##Г#Б##Т###",
+  "ДРАМА#МАЈА#"
+ ],
+ clues:[
+  {number:3,direction:"across",r:1,c:0,answer:"ПОРОЦИ",clue:"Што не треба да правите следејќи ги упатствата на Раван?"},
+  {number:5,direction:"down",r:2,c:7,answer:"ЧИСТОТА",clue:"Во каква состојба треба да се стане од нечист?"},
+  {number:4,direction:"down",r:1,c:2,answer:"РАЏАЈОГА",display:"РАЏА ЈОГА",clue:"Која јога се практикува за да се стекне висок статус и самосуверенитет?"},
+  {number:6,direction:"down",r:3,c:4,answer:"СЛУЖБА",clue:"Што треба да правите за да им го покажете на другите патот кон чистотата?"},
+  {number:7,direction:"across",r:4,c:1,answer:"НАСЛЕДСТВО",clue:"Што им го дава Таткото на своите деца?"},
+  {number:2,direction:"down",r:0,c:10,answer:"ТАТКО",clue:"Кого треба постојано да го запомнуваме за да ни бидат отсечени гревовите?"},
+  {number:8,direction:"across",r:8,c:0,answer:"ДРАМА",clue:"Што знаат децата дека се повторува точно како во претходниот циклус?"},
+  {number:9,direction:"across",r:8,c:6,answer:"МАЈА",clue:"Кој е опишан како толку моќен што брзо ги заробува децата?"},
+  {number:1,direction:"across",r:0,c:7,answer:"СВЕТ",clue:"Каков нов свет го создава Таткото за време на спојното доба?"}
+ ]
+};
+
+const keyRows=[
+ ["Љ","Њ","Е","Р","Т","Ѕ","У","И","О","П","Ш","Ѓ"],
+ ["А","С","Д","Ф","Г","Х","Ј","К","Л","Ч","Ќ"],
+ ["З","Џ","Ц","В","Б","Н","М","Ж"]
+];
+let STORAGE="murli-preview-crossword-v2-2026-10-01";
+let saved={};
+let active=null, dir="across", activeAnswer=ANSWERS[0];
+
+const grid=document.getElementById("grid");
+let cells={};
+let solvedAnswers=new Set();
+let autoNextNoticeTimer;
+const autoNext=document.getElementById("autoNext");
+autoNext.checked=readJSONStorage("murli-preview-auto-next",true)!==false;
+autoNext.addEventListener("change",()=>{
+  try{localStorage.setItem("murli-preview-auto-next",JSON.stringify(autoNext.checked));}catch(e){console.warn(e)}
+  clearAutoNextNotice();
+});
+
+
+// Input/schema checks protect both imported and locally persisted crosswords.
+const MK_ALPHABET=/^[АБВГДЃЕЖЗЅИЈКЛЉМНЊОПРСТЌУФХЦЧЏШ]+$/;
+const MK_ROW=/^[#АБВГДЃЕЖЗЅИЈКЛЉМНЊОПРСТЌУФХЦЧЏШ]+$/;
+function normalizePuzzle(data){
+  if(!data || typeof data!=="object" || Array.isArray(data)) throw new Error("Невалиден запис.");
+  const id=String(data.id||"");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(id)) throw new Error("Невалиден датум/ID.");
+  const [year,month,day]=id.split("-").map(Number);
+  const date=new Date(Date.UTC(year,month-1,day));
+  if(year<2000 || year>2100 || date.getUTCFullYear()!==year || date.getUTCMonth()+1!==month || date.getUTCDate()!==day)
+    throw new Error("Невалиден датум.");
+  if(["year","month","day"].some(k=>data[k]!=null && Number(data[k])!==({year,month,day}[k])))
+    throw new Error("Датумот не се совпаѓа.");
+  if(data.schemaVersion!=null && data.schemaVersion!==1) throw new Error("Неподдржана верзија на JSON.");
+  if(!Array.isArray(data.rows) || data.rows.length<2 || data.rows.length>24)
+    throw new Error("Невалидни редови.");
+  const rows=data.rows.map(r=>{if(typeof r!=="string")throw new Error("Невалиден ред.");return r;});
+  const width=rows[0].length;
+  if(width<2 || width>16 || !rows.every(r=>r.length===width && MK_ROW.test(r)))
+    throw new Error("Неправилна мрежа.");
+  if(!Array.isArray(data.clues) || data.clues.length<1 || data.clues.length>15)
+    throw new Error("Невалидни одговори.");
+  const seenNumbers=new Set(), covered=new Map();
+  const clues=data.clues.map(raw=>{
+    if(!raw || typeof raw!=="object") throw new Error("Невалиден одговор.");
+    const n=Number(raw.number??raw.n), dir=raw.direction??raw.dir;
+    const r=Number(raw.r),c=Number(raw.c);
+    if(!Number.isInteger(n)||n<1||n>99||seenNumbers.has(n))throw new Error("Повторен број на одговор.");
+    seenNumbers.add(n);
+    if(dir!=="across" && dir!=="down")throw new Error("Невалиден правец.");
+    if(!Number.isInteger(r)||!Number.isInteger(c)||r<0||c<0)throw new Error("Невалидни координати.");
+    if(typeof raw.answer!=="string")throw new Error("Невалиден збор.");
+    const answer=raw.answer.toUpperCase().replace(/\s/g,"");
+    if(answer.length<2||answer.length>24||!MK_ALPHABET.test(answer))throw new Error("Невалидни букви.");
+    if(typeof raw.clue!=="string" || !raw.clue.trim() || raw.clue.length>350)
+      throw new Error("Недостасува или е предолго прашањето.");
+    const display=raw.display==null ? undefined : String(raw.display);
+    if(display!==undefined && (display.length>80 || !/^[АБВГДЃЕЖЗЅИЈКЛЉМНЊОПРСТЌУФХЦЧЏШ ]+$/.test(display) || display.replace(/\s/g,"")!==answer))
+      throw new Error("Невалиден приказ на одговор.");
+    const dr=dir==="down"?1:0,dc=dir==="across"?1:0;
+    if(r+dr*(answer.length-1)>=rows.length||c+dc*(answer.length-1)>=width)
+      throw new Error("Збор надвор од мрежа.");
+    if(r-dr>=0&&c-dc>=0&&rows[r-dr][c-dc]!=="#")throw new Error("Несакано спојување зборови.");
+    if(r+dr*answer.length<rows.length&&c+dc*answer.length<width&&rows[r+dr*answer.length][c+dc*answer.length]!=="#")
+      throw new Error("Несакано спојување зборови.");
+    for(let i=0;i<answer.length;i++){
+      const rr=r+i*dr,cc=c+i*dc,key=`${rr},${cc}`;
+      if(rows[rr][cc]!==answer[i])throw new Error(`Несовпаѓање во мрежа: ${key}`);
+      const prev=covered.get(key)||[];
+      if(prev.includes(dir))throw new Error("Преклопување во ист правец.");
+      prev.push(dir);covered.set(key,prev);
+    }
+    return {n,dir,r,c,answer,display,clue:raw.clue.trim()};
+  });
+  for(let r=0;r<rows.length;r++)for(let c=0;c<width;c++){
+    if(rows[r][c]!=="#" && !covered.has(`${r},${c}`))throw new Error("Поле без одговор.");
+  }
+  // Reject adjacent letters that accidentally form an extra across/down word.
+  for(const direction of ["across","down"]){
+    const dr=direction==="down"?1:0,dc=direction==="across"?1:0;
+    for(let r=0;r<rows.length;r++)for(let c=0;c<width;c++){
+      if(rows[r][c]==="#")continue;
+      if(r-dr>=0 && c-dc>=0 && rows[r-dr][c-dc]!=="#")continue;
+      let length=0;
+      while(r+dr*length<rows.length && c+dc*length<width && rows[r+dr*length][c+dc*length]!=="#")length++;
+      if(length>=2 && !clues.some(a=>a.dir===direction && a.r===r && a.c===c && a.answer.length===length))
+        throw new Error("Несакано спојување на букви во нов збор.");
+    }
+  }
+  // All clues should form one connected crossword, not isolated islands.
+  if(clues.length>1){
+    const wordSet=a=>{
+      const result=new Set();
+      for(let i=0;i<a.answer.length;i++)result.add(`${a.r+(a.dir==="down"?i:0)},${a.c+(a.dir==="across"?i:0)}`);
+      return result;
+    };
+    const sets=clues.map(wordSet),visited=new Set([0]),todo=[0];
+    while(todo.length){
+      const index=todo.pop();
+      for(let j=0;j<sets.length;j++){
+        if(!visited.has(j) && [...sets[index]].some(key=>sets[j].has(key))){
+          visited.add(j);todo.push(j);
+        }
+      }
+    }
+    if(visited.size!==clues.length)throw new Error("Зборовите не се меѓусебно поврзани.");
+  }
+  const title=(typeof data.title==="string" && data.title.trim() && data.title.length<=70)
+    ? data.title.trim():`${month}/${day}`;
+  return {type:"murli-crossword",schemaVersion:1,id,year,month,day,title,rows,clues};
+}
+function readJSONStorage(key,fallback){
+  try {const raw=localStorage.getItem(key);return raw==null?fallback:JSON.parse(raw);}
+  catch(e){console.warn("Локален запис не може да се прочита:",key,e);return fallback;}
+}
+function writeJSONStorage(key,value){
+  try {localStorage.setItem(key,JSON.stringify(value));return true;}
+  catch(e){console.warn("Локалното зачувување не успеа:",e);
+    document.getElementById("status").textContent="⚠ Не може да се зачува напредокот. Провери го просторот во прелистувачот.";
+    return false;
+  }
+}
+function loadCrossword(data){
+  clearAutoNextNotice();
+  const puzzle=normalizePuzzle(data);
+  ROWS=puzzle.rows.slice();
+  ANSWERS=puzzle.clues;
+  STORAGE=`murli-preview-crossword-v2-${puzzle.id}`;
+  const previous=readJSONStorage(STORAGE,{});
+  saved=previous && typeof previous==="object" && !Array.isArray(previous) ? previous : {};
+  activeAnswer=ANSWERS[0];
+  active=null;dir=activeAnswer.dir;cells={};
+  grid.setAttribute("aria-label",`Крстозбор ${puzzle.title}`);
+  document.title=`Мурли ТЕСТ · ${puzzle.title}`;
+  buildGrid();
+  requestAnimationFrame(fitCrossword);
+  active=firstEditableCell(activeAnswer);
+  highlight();
+  resetCheck();
+  checkCompletedAnswers();
+  renderCurrent();
+}
+function isOpen(r,c){return ROWS[r]?.[c] && ROWS[r][c]!=="#"}
+function buildGrid(){
+ grid.innerHTML="";
+ grid.style.gridTemplateColumns=`repeat(${ROWS[0].length},1fr)`;
+ const starts={};
+ ANSWERS.forEach(a=>starts[`${a.r},${a.c}`]=a.n);
+ for(let r=0;r<ROWS.length;r++)for(let c=0;c<ROWS[0].length;c++){
+   const wrap=document.createElement("div");wrap.className="cell";
+   wrap.style.gridRow=r+1;wrap.style.gridColumn=c+1;
+   if(!isOpen(r,c)){wrap.classList.add("black");grid.appendChild(wrap);continue}
+   const input=document.createElement("input");
+   input.maxLength=1;input.inputMode="none";input.autocomplete="off";
+   input.value=(typeof saved[`${r},${c}`]==="string" ? norm(saved[`${r},${c}`]) : "");
+   input.setAttribute("aria-label",`клетка ${r+1}, ${c+1}`);
+   if(starts[`${r},${c}`]){
+     const num=document.createElement("span");num.className="number";num.textContent=starts[`${r},${c}`];num.dataset.n=starts[`${r},${c}`];num.style.pointerEvents="auto";num.style.cursor="pointer";num.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();selectAnswerByNumber(Number(num.dataset.n));});wrap.appendChild(num);
+   }
+   wrap.appendChild(input);grid.appendChild(wrap);
+   cells[`${r},${c}`]=input;
+   input.addEventListener("focus",()=>{selectCell(r,c);});
+   input.addEventListener("click",()=>{
+   const matches=ANSWERS.filter(a=>wordCells(a).some(p=>p.r===r&&p.c===c));
+   if(matches.length>1 && matches.some(a=>a.n===activeAnswer.n)){
+     const other=matches.find(a=>a.n!==activeAnswer.n);
+     if(other){activeAnswer=other;dir=other.dir;}
+   }
+   selectCell(r,c);
+ });
+   input.addEventListener("input",()=>applyInput(input,input.value));
+ }
+}
+function norm(v){return v.toUpperCase().replace(/[^АБВГДЃЕЖЗЅИЈКЛЉМНЊОПРСТЌУФХЦЧЏШ]/g,"").slice(0,1)}
+function wordCells(a){
+ const out=[];let r=a.r,c=a.c;
+ for(let i=0;i<a.answer.length;i++){out.push({r,c});r+=a.dir==="down"?1:0;c+=a.dir==="across"?1:0}
+ return out;
+}
+function isCorrectCell(p){
+ const value=cells[`${p.r},${p.c}`]?.value;
+ return !!value && value===ROWS[p.r][p.c];
+}
+function firstEditableCell(answer){
+ const positions=wordCells(answer);
+ return positions.find(p=>!cells[`${p.r},${p.c}`]?.value)
+   ||positions.find(p=>!isCorrectCell(p))||positions[0];
+}
+function selectAnswerByNumber(n){
+ const a=ANSWERS.find(x=>x.n===n);
+ if(!a)return;
+ selectAnswer(a);
+}
+function selectAnswer(a){
+ clearAutoNextNotice();
+ activeAnswer=a;dir=a.dir;active=firstEditableCell(a);
+ highlight();renderCurrent();
+ const inp=cells[`${active.r},${active.c}`];
+ if(inp) inp.focus({preventScroll:true});
+}
+function selectCell(r,c){
+ clearAutoNextNotice();
+ const matches=ANSWERS.filter(a=>wordCells(a).some(p=>p.r===r&&p.c===c));
+ if(!matches.length)return;
+ active={r,c};
+ // Preserve the currently active word if this cell belongs to it.
+ if(!matches.some(a=>a.n===activeAnswer.n)){
+   const sameDir=matches.find(a=>a.dir===dir);
+   activeAnswer=sameDir||matches[0];
+   dir=activeAnswer.dir;
+ }
+ highlight();renderCurrent();
+}
+function highlight(){
+ Object.values(cells).forEach(x=>x.classList.remove("active"));
+ if(!active)return;
+ cells[`${active.r},${active.c}`]?.classList.add("active");
+}
+function move(step){
+ if(!active)return;
+ const a=activeAnswer, p=wordCells(a);
+ let i=p.findIndex(x=>x.r===active.r&&x.c===active.c);
+ if(i<0)i=0;
+ // Forward input skips correct intersections; backward navigation stays manual.
+ const next=step>0
+   ?p.slice(i+1).concat(p.slice(0,i)).find(position=>!isCorrectCell(position))
+   :p[i+step];
+ if(next){
+   active=next;cells[`${active.r},${active.c}`].focus({preventScroll:true});highlight();renderCurrent();
+ }
+}
+function save(){
+ resetCheck();
+ const s={};Object.entries(cells).forEach(([k,v])=>{if(v.value)s[k]=v.value});
+ const stored=writeJSONStorage(STORAGE,s);
+ if(stored)checkCompletedAnswers();
+ return stored;
+}
+function clearAutoNextNotice(){
+ clearTimeout(autoNextNoticeTimer);
+ document.getElementById("autoNextNotice").textContent="";
+}
+function applyInput(input,value){
+ const answer=activeAnswer,wasSolved=solvedAnswers.has(answer.n);
+ clearAutoNextNotice();
+ input.value=norm(value);
+ const stored=save();
+ if(stored && autoNext.checked && !wasSolved && solvedAnswers.has(answer.n)){
+   const ordered=ANSWERS.slice().sort((a,b)=>a.n-b.n);
+   const next=ordered.filter(a=>a.n>answer.n).concat(ordered.filter(a=>a.n<=answer.n))
+     .find(a=>!solvedAnswers.has(a.n));
+   if(next){
+     selectAnswer(next);
+     document.getElementById("autoNextNotice").textContent=`Следно прашање: ${next.n}`;
+     autoNextNoticeTimer=setTimeout(clearAutoNextNotice,4000);
+     return;
+   }
+ }else if(input.value){move(1);}
+ renderCurrent();
+}
+function resetCheck(){
+ Object.values(cells).forEach(inp=>inp.classList.remove("good","bad"));
+ document.getElementById("status").textContent="";
+}
+function checkCompletedAnswers(){
+ solvedAnswers=new Set(ANSWERS.filter(answer=>wordCells(answer).every(isCorrectCell)).map(answer=>answer.n));
+ const completedCells=new Set();
+ ANSWERS.forEach(answer=>{
+   const positions=wordCells(answer);
+   if(positions.every(p=>cells[`${p.r},${p.c}`]?.value)){
+     positions.forEach(p=>completedCells.add(`${p.r},${p.c}`));
+   }
+ });
+ completedCells.forEach(key=>{
+   const [r,c]=key.split(",").map(Number),inp=cells[key];
+   const correct=inp.value===ROWS[r][c];
+   inp.classList.toggle("good",correct);
+   inp.classList.toggle("bad",!correct);
+ });
+ if(Object.values(cells).every(inp=>inp.value))check();
+}
+function renderCurrent(){
+ document.getElementById("currentNum").textContent=activeAnswer.n;
+ document.getElementById("currentDir").textContent=activeAnswer.dir==="across"?"ХОРИЗОНТАЛНО":"ВЕРТИКАЛНО";
+ document.getElementById("currentLen").textContent=`${activeAnswer.answer.length} букви`;
+ document.getElementById("currentClue").textContent=activeAnswer.clue;
+ const p=document.getElementById("pattern");p.innerHTML="";
+ wordCells(activeAnswer).forEach(x=>{
+   const b=document.createElement("span");b.className="pbox";
+   b.textContent=cells[`${x.r},${x.c}`]?.value||"";
+   if(active&&x.r===active.r&&x.c===active.c)b.classList.add("selected");
+   p.appendChild(b);
+ });
+ renderClues();
+}
+function renderClues(filter="all"){
+ const box=document.getElementById("clues");box.innerHTML="";
+ ANSWERS.filter(a=>filter==="all"||a.dir===filter).forEach(a=>{
+   const d=document.createElement("div");d.className="clue"+(a.n===activeAnswer.n?" active":"");
+   const num=document.createElement("span");num.className="clue-num";num.textContent=String(a.n);
+   const word=document.createElement("span");word.className="clue-text";word.textContent=a.display||a.answer;
+   const len=document.createElement("span");len.className="clue-len";len.textContent=`${a.answer.length} букви`;
+   d.append(num,word,len);
+   d.onclick=()=>{
+  selectAnswer(a);
+  closeQuestions();
+};
+   box.appendChild(d);
+ });
+}
+function check(){
+ let good=0,total=0;
+ Object.entries(cells).forEach(([key,inp])=>{
+   const [r,c]=key.split(",").map(Number);
+   total++;const ok=inp.value===ROWS[r][c];
+   if(ok){good++;inp.classList.add("good");inp.classList.remove("bad")}
+   else if(inp.value){inp.classList.add("bad");inp.classList.remove("good")}
+   else inp.classList.remove("good","bad");
+ });
+ const st=document.getElementById("status");
+ st.textContent=good===total?`✓ Точно решено — ${total} букви.`:`Точно: ${good} од ${total} букви.`;
+}
+function clearAll(){
+ clearAutoNextNotice();solvedAnswers.clear();
+ Object.values(cells).forEach(x=>{x.value="";x.classList.remove("good","bad")});
+ try{localStorage.removeItem(STORAGE);}catch(e){console.warn(e)}renderCurrent();document.getElementById("status").textContent="";
+}
+document.getElementById("check").onclick=check;
+document.getElementById("clear").onclick=clearAll;
+
+document.getElementById("back").onclick=()=>move(-1);
+document.getElementById("del").onclick=()=>{
+ if(!active)return;
+ const inp=cells[`${active.r},${active.c}`];
+ if(inp.value){inp.value="";save();renderCurrent()}
+ else move(-1);
+};
+const questionsModal=document.getElementById("questionsModal");
+function openQuestions(){questionsModal.classList.add("open");questionsModal.setAttribute("aria-hidden","false");renderClues();}
+function closeQuestions(){questionsModal.classList.remove("open");questionsModal.setAttribute("aria-hidden","true");}
+document.getElementById("openQuestions").onclick=openQuestions;
+document.getElementById("closeQuestions").onclick=closeQuestions;
+questionsModal.addEventListener("click",e=>{if(e.target===questionsModal)closeQuestions()});
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");renderClues(t.dataset.tab);});
+
+const kb=document.getElementById("keyboard");
+keyRows.forEach((row,ri)=>{
+ const rowEl=document.createElement("div");rowEl.className="keyRow row"+(ri+1);
+ row.forEach(ch=>{
+  const b=document.createElement("button");b.className="key";b.setAttribute("aria-label",ch);const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("aria-hidden","true");svg.classList.add("keySvg");const text=document.createElementNS("http://www.w3.org/2000/svg","text");text.setAttribute("x","50");text.setAttribute("y","68");text.setAttribute("text-anchor","middle");text.setAttribute("font-family","system-ui, sans-serif");text.setAttribute("font-size","58");text.setAttribute("font-weight","900");text.setAttribute("fill","#000000");text.textContent=ch;svg.appendChild(text);b.appendChild(svg);
+  b.onclick=()=>{
+   if(!active)active=firstEditableCell(activeAnswer);
+   const inp=cells[`${active.r},${active.c}`];
+   applyInput(inp,ch);
+  };
+  rowEl.appendChild(b);
+ });
+ kb.appendChild(rowEl);
+});
+const intro=document.getElementById("introPanel");
+try{if(localStorage.getItem("murli-preview-intro-seen"))intro.style.display="none";}catch(e){console.warn(e)}
+document.getElementById("introDone").onclick=()=>{try{localStorage.setItem("murli-preview-intro-seen","1");}catch(e){console.warn(e)}intro.remove();};
+
+const homeScreen=document.getElementById("homeScreen");
+const gameMain=document.getElementById("gameMain");
+const archiveGrid=document.getElementById("archiveGrid");
+const fileInput=document.getElementById("fileInput");
+
+let currentPuzzle=BUILTIN_CROSSWORD;
+function samePuzzleContent(left,right){
+  const a=normalizePuzzle(left),b=normalizePuzzle(right);
+  a.clues.sort((x,y)=>x.n-y.n);
+  b.clues.sort((x,y)=>x.n-y.n);
+  return JSON.stringify(a)===JSON.stringify(b);
+}
+function readRawLibrary(){
+  const text=localStorage.getItem("murli-preview-crossword-library");
+  const raw=text===null ? [] : JSON.parse(text);
+  if(!Array.isArray(raw))throw new Error("Локалната библиотека не е валидна.");
+  return raw;
+}
+function getLibrary(){
+  let raw;
+  try{raw=readRawLibrary();}
+  catch(e){
+    console.warn("Библиотеката е оштетена:",e);
+    document.getElementById("homeNotice").textContent="⚠ Локалната библиотека е оштетена. Вградените крстозбори работат; оригиналот е зачуван, но увозот е блокиран за да не се пребрише.";
+    return [];
+  }
+  const result=[];
+  let invalid=0;
+  for(const x of raw){
+    try {result.push(normalizePuzzle(x));}
+    catch(e){invalid++;}
+  }
+  if(invalid){document.getElementById("homeNotice").textContent=`⚠ ${invalid} невалидни локални записи се прескокнати; оригиналот не е избришан.`;}
+  return result;
+}
+function getRemoteLibrary(){
+  const raw=readJSONStorage("murli-preview-remote-library-v1",[]);
+  if(!Array.isArray(raw))return [];
+  const valid=[];
+  for(const puzzle of raw){try{valid.push(normalizePuzzle(puzzle));}catch(e){console.warn("Прескокнат оштетен преземен крстозбор",e);}}
+  return valid;
+}
+function getPuzzle(id){
+  const imported=getLibrary().find(x=>x.id===id);
+  if(imported) return imported; // A consciously accepted local replacement has priority.
+  if(id===BUILTIN_CROSSWORD.id) return BUILTIN_CROSSWORD;
+  if(id===BUILTIN_CROSSWORD_02.id) return BUILTIN_CROSSWORD_02;
+  return getRemoteLibrary().find(x=>x.id===id)||null;
+}
+function backupPreviousProgress(id){
+  const key=`murli-preview-crossword-v2-${id}`;
+  try {
+    const previous=localStorage.getItem(key);
+    if(previous!==null){
+      const backupKey=`${key}-backup-${Date.now()}`;
+      localStorage.setItem(backupKey,previous);
+      localStorage.removeItem(key);
+    }
+    return true;
+  } catch(e){console.warn("Резервна копија не успеа",e);return false;}
+}
+function showGame(id="2026-10-01"){
+  const puzzle=getPuzzle(id);
+  if(!puzzle){alert("Крстозборот не е пронајден.");return;}
+  currentPuzzle=puzzle;
+  document.body.classList.add("game-open");
+  homeScreen.classList.remove("show");
+  gameMain.style.display="";
+  try{
+    loadCrossword(puzzle);
+  }catch(e){
+    alert("Крстозборот не може да се отвори.");
+    showHome();
+  }
+}
+function showHome(){
+  gameMain.style.display="none";
+  document.body.classList.remove("game-open");
+  homeScreen.classList.add("show");
+  renderArchive();
+}
+function renderArchive(){
+  archiveGrid.innerHTML="";
+  document.getElementById("continueBtn").disabled=!getPuzzle("2026-10-14");
+  const items=new Map();
+  for(const puzzle of [BUILTIN_CROSSWORD,BUILTIN_CROSSWORD_02,...getRemoteLibrary(),...getLibrary()]){
+    const x=normalizePuzzle(puzzle);items.set(x.id,x);
+  }
+  const months=["Јануари","Февруари","Март","Април","Мај","Јуни","Јули","Август","Септември","Октомври","Ноември","Декември"];
+  let previousYear,previousMonth,group;
+  for(const item of [...items.values()].sort((a,b)=>a.id.localeCompare(b.id))){
+    if(item.year!==previousYear){
+      const year=document.createElement("div");year.className="home-year";year.textContent=item.year;
+      archiveGrid.appendChild(year);previousYear=item.year;previousMonth=null;
+    }
+    if(item.month!==previousMonth){
+      const month=document.createElement("div");month.className="month-title";month.textContent=months[item.month-1];
+      group=document.createElement("div");group.className="archive-grid";
+      archiveGrid.append(month,group);previousMonth=item.month;
+    }
+    const b=document.createElement("button");
+    b.className="archive-item";b.textContent=item.title;b.title=item.id;
+    b.onclick=()=>showGame(item.id);group.appendChild(b);
+  }
+}
+document.getElementById("archiveMini").onclick=showHome;
+document.getElementById("continueBtn").onclick=()=>showGame("2026-10-14");
+document.getElementById("importBtn").onclick=()=>fileInput.click();
+
+fileInput.addEventListener("change",async()=>{
+  const file=fileInput.files?.[0];
+  if(!file)return;
+  try{
+    if(file.size>512*1024)throw new Error("Датотеката е преголема (максимум 512 KB).");
+    const data=JSON.parse(await file.text());
+    const records=data?.type==="murli-crossword-package" && Array.isArray(data.crosswords) ? data.crosswords :
+                  data?.type==="murli-crossword" ? [data] : [];
+    if(!records.length || records.length>31)throw new Error("Невалиден пакет.");
+    // Validate every item before writing anything, never partially import invalid packages.
+    const normalized=records.map(normalizePuzzle);
+    if(new Set(normalized.map(x=>x.id)).size!==normalized.length)throw new Error("Повторен датум во пакетот.");
+    const currentRaw=readRawLibrary();
+    const library=[];
+    for(const x of currentRaw)library.push(normalizePuzzle(x));
+    let added=0,skipped=0,replaced=0;
+    for(const x of normalized){
+      const old=getPuzzle(x.id);
+      if(old){
+        const existing=normalizePuzzle(old);
+        // Ignore duplicates, including exact copies of built-in puzzles.
+        if(samePuzzleContent(existing,x)){skipped++;continue;}
+        const sameGrid=JSON.stringify(existing.rows)===JSON.stringify(x.rows);
+        const explanation=sameGrid
+          ? "Постојните внесени букви ќе останат зачувани."
+          : "Мрежата е изменета. Претходниот напредок ќе се зачува во локална резервна копија и ќе започне празна мрежа.";
+        if(!confirm(`Крстозборот ${x.title} веќе постои. Дали да се замени со оваа верзија?\n${explanation}`)){
+          skipped++;continue;
+        }
+        if(!sameGrid && !backupPreviousProgress(x.id))
+          throw new Error("Не може да се направи резервна копија на напредокот. Замена е откажана.");
+        const index=library.findIndex(v=>v.id===x.id);
+        if(index>=0) library[index]=x;
+        else library.push(x);
+        replaced++;
+      }else{
+        library.push(x);added++;
+      }
+    }
+    if(added+replaced && !writeJSONStorage("murli-preview-crossword-library",library))
+      throw new Error("Нема простор за зачувување на крстозборите.");
+    renderArchive();
+    alert(`Увезено: ${added}. Заменето: ${replaced}. Веќе постоечки/прескокнати: ${skipped}.`);
+  }catch(e){
+    alert(`Неуспешен увоз: ${e.message||"Невалидна датотека."}`);
+  }finally{fileInput.value="";}
+});
+
+buildGrid();
+active=wordCells(activeAnswer)[0];
+renderCurrent();
+gameMain.style.display="none";
+renderArchive();
+
+</script>
+
+<script src="./compact-layout.js"></script>
+<script src="./catalogue-sync.js"></script>
+<script id="pwa-install-script">
+(() => {
+  const banner=document.getElementById("updateBanner");
+  let hadController=!!navigator.serviceWorker?.controller;
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(hadController)banner.classList.add("show");
+      hadController=true;
+    });
+    window.addEventListener("load",async()=>{
+      try{
+        const registration=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});
+        let lastCheck=Date.now();
+        document.addEventListener("visibilitychange",()=>{
+          if(!document.hidden && Date.now()-lastCheck>30*60*1000){
+            lastCheck=Date.now();registration.update().catch(e=>console.warn("PWA update:",e));
+          }
+        });
+      }catch(e){console.warn("PWA offline registration unavailable:",e);}
+    });
+  }
+  document.getElementById("updateNow").addEventListener("click",()=>location.reload());
+  document.getElementById("updateLater").addEventListener("click",()=>banner.classList.remove("show"));
+  let deferredPrompt=null;
+  const btn=document.getElementById("pwaInstallBtn");
+  window.addEventListener("beforeinstallprompt",event=>{
+    event.preventDefault();deferredPrompt=event;
+    if(!matchMedia("(display-mode: standalone)").matches)btn?.classList.add("show");
+  });
+  btn?.addEventListener("click",async()=>{
+    if(!deferredPrompt)return;
+    deferredPrompt.prompt();
+    try{await deferredPrompt.userChoice;}catch(e){console.warn(e)}
+    deferredPrompt=null;btn.classList.remove("show");
+  });
+  window.addEventListener("appinstalled",()=>btn?.classList.remove("show"));
+})();
+</script>
+
+</body>
+</html>
