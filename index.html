@@ -225,7 +225,10 @@ body.game-open{min-height:0;overscroll-behavior-y:none}
 #autoNextNotice:empty{min-height:17px}
 .keyboard-panel{margin-top:auto}
 .grid-tools{flex-wrap:wrap}
+.grid-tools{grid-template-columns:repeat(3,minmax(0,1fr)) 38px}
 .grid-tools .tool{min-width:0;white-space:normal;overflow-wrap:anywhere}
+.keyboard-panel .keyRow .key.control-key{padding:4px!important;overflow:hidden}
+.control-key svg{display:block;width:100%;height:100%;pointer-events:none}
 @media(max-height:619px){#gameMain{padding-bottom:2px}.current .current-clue{font-size:16px}.keyboard-panel .keyRow .key{height:36px}}
 </style></head>
 <body>
@@ -690,8 +693,8 @@ keyRows.forEach((row,ri)=>{
 });
 const bottomRow=document.querySelector("#keyboard .keyRow.row3");
 const backControl=document.getElementById("back"),deleteControl=document.getElementById("del");
-backControl.textContent="←";backControl.setAttribute("aria-label","Назад");backControl.title="Назад";backControl.classList.add("control-key");
-deleteControl.textContent="⌫";deleteControl.setAttribute("aria-label","Избриши");deleteControl.title="Избриши";deleteControl.classList.add("control-key");
+backControl.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M82 50H20M43 25L18 50L43 75" fill="none" stroke="#000" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>';backControl.setAttribute("aria-label","Назад");backControl.title="Назад";backControl.classList.add("control-key");
+deleteControl.innerHTML='<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="M38 20H86V80H38L10 50Z M48 35L73 65 M73 35L48 65" fill="none" stroke="#000" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';deleteControl.setAttribute("aria-label","Избриши");deleteControl.title="Избриши";deleteControl.classList.add("control-key");
 bottomRow.prepend(backControl);bottomRow.append(deleteControl);
 document.querySelector(".keyboard-actions").remove();
 const intro=document.getElementById("introPanel");
