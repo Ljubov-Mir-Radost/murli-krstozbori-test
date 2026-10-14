@@ -208,6 +208,18 @@ body.game-open #introPanel .intro-text{margin-bottom:15px}
 .keyboard .keyRow.row3{grid-template-columns:repeat(10,minmax(0,1fr));padding:0 6%}
 .keyboard-panel .keyRow .key{height:38px}
 .keyboard-panel .keyRow .key.control-key{background:#fff !important;color:#000 !important;border:2px solid #000 !important;font-size:22px;line-height:1}
+</style><style id="preview-readability">
+html{overscroll-behavior-y:none}
+body.game-open{min-height:0;overscroll-behavior-y:none}
+#autoNextNotice:empty{min-height:0}
+.current .current-clue{font-size:18px;line-height:1.3;font-weight:800}
+.keyboard-panel .keyRow .key{height:44px}
+.keyboard-panel .keyRow .key.control-key{font-size:25px}
+.keyboard-panel .keySvg text{font-size:68px}
+@media(min-height:680px){.current .current-clue{font-size:20px}.keyboard-panel .keyRow .key{height:48px}}
+@media(min-height:780px){.current .current-clue{font-size:22px}.keyboard-panel .keyRow .key{height:52px}}
+@media(max-height:619px){.keyboard-panel .keyRow .key{height:40px}}
+@media(max-height:559px){.current .current-clue{font-size:16px}.keyboard-panel .keyRow .key{height:38px}}
 </style></head>
 <body>
 <button id="pwaInstallBtn" type="button">📲 Инсталирај апликација</button>
@@ -659,7 +671,7 @@ const kb=document.getElementById("keyboard");
 keyRows.forEach((row,ri)=>{
  const rowEl=document.createElement("div");rowEl.className="keyRow row"+(ri+1);
  row.forEach(ch=>{
-  const b=document.createElement("button");b.className="key";b.setAttribute("aria-label",ch);const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("aria-hidden","true");svg.classList.add("keySvg");const text=document.createElementNS("http://www.w3.org/2000/svg","text");text.setAttribute("x","50");text.setAttribute("y","68");text.setAttribute("text-anchor","middle");text.setAttribute("font-family","system-ui, sans-serif");text.setAttribute("font-size","58");text.setAttribute("font-weight","900");text.setAttribute("fill","#000000");text.textContent=ch;svg.appendChild(text);b.appendChild(svg);
+  const b=document.createElement("button");b.className="key";b.setAttribute("aria-label",ch);const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("aria-hidden","true");svg.classList.add("keySvg");const text=document.createElementNS("http://www.w3.org/2000/svg","text");text.setAttribute("x","50");text.setAttribute("y","72");text.setAttribute("text-anchor","middle");text.setAttribute("font-family","system-ui, sans-serif");text.setAttribute("font-size","58");text.setAttribute("font-weight","900");text.setAttribute("fill","#000000");text.textContent=ch;svg.appendChild(text);b.appendChild(svg);
   b.onclick=()=>{
    if(!active)active=firstEditableCell(activeAnswer);
    const inp=cells[`${active.r},${active.c}`];
