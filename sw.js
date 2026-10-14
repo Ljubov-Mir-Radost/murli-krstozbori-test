@@ -1,6 +1,6 @@
 /* Murli Крстозбори v16 — only public, same-origin app assets are cached. */
 const CACHE_PREFIX = `murli-preview-${new URL(self.registration.scope).pathname}-`;
-const CACHE = `${CACHE_PREFIX}compact-preview-v10`;
+const CACHE = `${CACHE_PREFIX}compact-preview-v11`;
 const ASSETS = [
   "./", "./index.html", "./manifest.webmanifest", "./catalogue-sync.js", "./compact-layout.js",
   "./crosswords/2026-10-14.json", "./icons/icon-192.png", "./icons/icon-512.png"

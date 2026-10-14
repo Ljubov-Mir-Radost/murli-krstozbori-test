@@ -4,6 +4,7 @@ function fitCrossword(){
  if(!document.body.classList.contains('game-open'))return;
  const panel=grid.parentElement,mainStyle=getComputedStyle(gameMain);
  const viewportHeight=window.visualViewport?.height||window.innerHeight;
+ const wide=matchMedia('(min-width:600px) and (min-height:700px)').matches;
  const css=el=>getComputedStyle(el),num=x=>parseFloat(x)||0;
  let reserved=num(mainStyle.paddingTop)+num(mainStyle.paddingBottom);
  for(const child of gameMain.children){
@@ -20,13 +21,14 @@ function fitCrossword(){
  // allowing the accessible scrolling fallback. Never clip content.
  const reserve=Math.max(8,Math.min(viewportHeight*.04,viewportHeight-reserved-minimumBoard-8));
  const height=viewportHeight-reserved-reserve-8;
- const cell=Math.min(42,(width-gap*(cols-1))/cols,(height-gap*(rows-1))/rows);
+ const cell=Math.min(wide?64:42,(width-gap*(cols-1))/cols,(height-gap*(rows-1))/rows);
  // Tiny screens / older oversized puzzles retain readable cells and accessible scrolling.
  const size=Math.max(24,Math.floor(cell));
  grid.style.width=(size*cols+gap*(cols-1))+'px';
  grid.style.maxWidth='100%';
  grid.dataset.compactFits=cell>=24?'true':'false';
- gameMain.style.minHeight=Math.floor(viewportHeight-reserve)+'px';
+ gameMain.style.minHeight=wide?'0px':Math.floor(viewportHeight-reserve)+'px';
+ gameMain.dataset.layout=wide?'wide':'compact';
  grid.dataset.reserve=Math.round(reserve);
  grid.dataset.maximumRows=Math.floor((height+gap)/(24+gap));
  grid.dataset.maximumColumns=Math.floor((width+gap)/(24+gap));

@@ -230,6 +230,16 @@ body.game-open{min-height:0;overscroll-behavior-y:none}
 .keyboard-panel .keyRow .key.control-key{padding:4px!important;overflow:hidden}
 .control-key svg{display:block;width:100%;height:100%;pointer-events:none}
 @media(max-height:619px){#gameMain{padding-bottom:2px}.current .current-clue{font-size:16px}.keyboard-panel .keyRow .key{height:36px}}
+@media(min-width:600px) and (min-height:700px){
+ .current .current-clue{min-height:1.3em}
+ #gameMain{width:min(100%,720px)}
+ .keyboard-panel{margin-top:3px}
+ .cell input{font-size:clamp(24px,3vw,36px)}
+ .cell .number{font-size:12px;line-height:12px}
+ .grid-tools{grid-template-columns:repeat(3,minmax(0,1fr)) 48px}
+ .grid-tools .tool{font-size:15px;padding:8px 12px}
+ .grid-tools .archive-mini{width:48px}
+}
 </style></head>
 <body>
 <button id="pwaInstallBtn" type="button">📲 Инсталирај апликација</button>
