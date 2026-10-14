@@ -219,7 +219,14 @@ body.game-open{min-height:0;overscroll-behavior-y:none}
 @media(min-height:680px){.current .current-clue{font-size:20px}.keyboard-panel .keyRow .key{height:48px}}
 @media(min-height:780px){.current .current-clue{font-size:22px}.keyboard-panel .keyRow .key{height:52px}}
 @media(max-height:619px){.keyboard-panel .keyRow .key{height:40px}}
-@media(max-height:559px){.current .current-clue{font-size:16px}.keyboard-panel .keyRow .key{height:38px}}
+@media(max-height:559px){.current .current-clue{font-size:16px}.keyboard-panel .keyRow .key{height:36px}}
+</style><style id="fixed-game-layout">
+.current-clue{min-height:2.6em}
+#autoNextNotice:empty{min-height:17px}
+.keyboard-panel{margin-top:auto}
+.grid-tools{flex-wrap:wrap}
+.grid-tools .tool{min-width:0;white-space:normal;overflow-wrap:anywhere}
+@media(max-height:619px){#gameMain{padding-bottom:2px}.current .current-clue{font-size:16px}.keyboard-panel .keyRow .key{height:36px}}
 </style></head>
 <body>
 <button id="pwaInstallBtn" type="button">📲 Инсталирај апликација</button>
@@ -467,10 +474,10 @@ function loadCrossword(data){
 function isOpen(r,c){return ROWS[r]?.[c] && ROWS[r][c]!=="#"}
 function buildGrid(){
  grid.innerHTML="";
- grid.style.gridTemplateColumns=`repeat(${ROWS[0].length},1fr)`;
+ grid.style.gridTemplateColumns=`repeat(${Math.max(9,ROWS[0].length)},1fr)`;
  const starts={};
  ANSWERS.forEach(a=>starts[`${a.r},${a.c}`]=a.n);
- for(let r=0;r<ROWS.length;r++)for(let c=0;c<ROWS[0].length;c++){
+ for(let r=0;r<Math.max(7,ROWS.length);r++)for(let c=0;c<Math.max(9,ROWS[0].length);c++){
    const wrap=document.createElement("div");wrap.className="cell";
    wrap.style.gridRow=r+1;wrap.style.gridColumn=c+1;
    if(!isOpen(r,c)){wrap.classList.add("black");grid.appendChild(wrap);continue}

@@ -9,19 +9,27 @@ function fitCrossword(){
  for(const child of gameMain.children){
   const style=css(child);
   if(style.display==='none'||style.position==='fixed')continue;
-  reserved+=child.getBoundingClientRect().height+num(style.marginTop)+num(style.marginBottom);
+  reserved+=child.getBoundingClientRect().height+(child.classList.contains('keyboard-panel')?3:num(style.marginTop))+num(style.marginBottom);
  }
  reserved-=grid.getBoundingClientRect().height;
  const panelStyle=css(panel);
  const width=panel.clientWidth-num(panelStyle.paddingLeft)-num(panelStyle.paddingRight);
- const rows=ROWS.length,cols=ROWS[0].length,gap=2;
- const height=Math.min(viewportHeight*.4,viewportHeight-reserved-8);
+ const rows=Math.max(7,ROWS.length),cols=Math.max(9,ROWS[0].length),gap=2;
+ const minimumBoard=24*rows+gap*(rows-1);
+ // Reserve 10% normally; on short screens keep at least 16px before
+ // allowing the accessible scrolling fallback. Never clip content.
+ const reserve=Math.max(8,Math.min(viewportHeight*.10,viewportHeight-reserved-minimumBoard-8));
+ const height=viewportHeight-reserved-reserve-8;
  const cell=Math.min(42,(width-gap*(cols-1))/cols,(height-gap*(rows-1))/rows);
  // Tiny screens / older oversized puzzles retain readable cells and accessible scrolling.
  const size=Math.max(24,Math.floor(cell));
  grid.style.width=(size*cols+gap*(cols-1))+'px';
  grid.style.maxWidth='100%';
  grid.dataset.compactFits=cell>=24?'true':'false';
+ gameMain.style.minHeight=Math.floor(viewportHeight-reserve)+'px';
+ grid.dataset.reserve=Math.round(reserve);
+ grid.dataset.maximumRows=Math.floor((height+gap)/(24+gap));
+ grid.dataset.maximumColumns=Math.floor((width+gap)/(24+gap));
 }
 function scheduleCompactFit(){
  cancelAnimationFrame(compactFrame);compactFrame=requestAnimationFrame(fitCrossword);
