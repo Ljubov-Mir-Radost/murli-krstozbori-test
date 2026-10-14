@@ -42,7 +42,7 @@ async function downloadCatalogue(){
   let added=0,failed=0;
   for(const item of entries){
     // Local imports and previously published dates are preserved. Corrections use explicit JSON import.
-    if(getPuzzle(item.id))continue;
+    if(RETIRED_PUZZLES.has(item.id)||getPuzzle(item.id))continue;
     try{
       const bytes=await fetchCatalogueFile(item.file,512*1024);
       const digest=Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",bytes)),b=>b.toString(16).padStart(2,"0")).join("");
@@ -50,7 +50,7 @@ async function downloadCatalogue(){
       const puzzle=normalizePuzzle(JSON.parse(new TextDecoder().decode(bytes)));
       if(puzzle.id!==item.id)throw new Error("Несовпаѓање на датумот.");
       // Re-check after awaiting network: an import may have happened meanwhile.
-      if(getPuzzle(item.id))continue;
+      if(RETIRED_PUZZLES.has(item.id)||getPuzzle(item.id))continue;
       normalized.push(puzzle);added++;
     }catch(e){failed++;console.warn("Крстозборот не е преземен:",item.id,e);}
   }

@@ -2,16 +2,6 @@
   "schemaVersion": 1,
   "crosswords": [
     {
-      "id": "2026-10-01",
-      "file": "crosswords/2026-10-01.json",
-      "sha256": "155b9e9bc8d1b3323c05a9febb83f3053eab97d564cca69612af4e09763530f9"
-    },
-    {
-      "id": "2026-10-02",
-      "file": "crosswords/2026-10-02.json",
-      "sha256": "330fbf45c2c740503408899dcf223f8b54bc1cfcf0124a9e1794b2eeb447ecd2"
-    },
-    {
       "id": "2026-10-14",
       "file": "crosswords/2026-10-14.json",
       "sha256": "db2d9c476d00855052d7eb2ffe3ca5b2dfdc1535a65c7479d6e6043120b85096"

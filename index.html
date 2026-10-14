@@ -193,14 +193,22 @@ details[open] summary:after{content:"−"}
 body{min-height:100dvh}
 main{min-height:0}
 body.game-open #pwaInstallBtn{display:none}
-body.game-open #introPanel{position:fixed;inset:10px;z-index:100;display:block;overflow:auto;max-width:540px;margin:auto;background:var(--panel)}
+body.game-open #introPanel{position:fixed;top:50%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);z-index:100;display:block;overflow:auto;width:min(calc(100% - 32px),420px);max-height:calc(100dvh - 32px);height:auto;margin:0;padding:16px;background:var(--panel);box-shadow:0 8px 35px #0009,0 0 0 100vmax #0008}
+body.game-open #introPanel .intro-text{font-weight:500;font-size:15px;line-height:1.4}
+body.game-open #introPanel p{margin:10px 0}
+body.game-open #introPanel #introTitle{font-size:18px}
+body.game-open #introPanel #introDone{width:100%;padding:10px}
 body.game-open #introPanel .intro-text{margin-bottom:15px}
 .cell input{font-size:clamp(17px,4.5vw,26px)}
 .keyboard-title{min-height:18px}
 .keyboard-title strong{font-size:14px;white-space:nowrap}
 .keyboard-title span{display:none}
 </style>
-</head>
+<style id="compact-keyboard-controls">
+.keyboard .keyRow.row3{grid-template-columns:repeat(10,minmax(0,1fr));padding:0 6%}
+.keyboard-panel .keyRow .key{height:38px}
+.keyboard-panel .keyRow .key.control-key{background:#fff !important;color:#000 !important;border:2px solid #000 !important;font-size:22px;line-height:1}
+</style></head>
 <body>
 <button id="pwaInstallBtn" type="button">📲 Инсталирај апликација</button>
 <div id="updateBanner" role="status" aria-live="polite">
@@ -235,9 +243,12 @@ body.game-open #introPanel .intro-text{margin-bottom:15px}
 </section>
 
 <main id="gameMain">
-<section class="panel intro" id="introPanel">
-  <div class="intro-text"><strong>Како се игра?</strong><br><strong>Избери поле во крстозборот и прочитај го прашањето. Обиди се да го најдеш решението и внеси го преку кириличната тастатура. По секоја буква автоматски се оди на следното празно или погрешно поле, прескокнувајќи ги точните букви. Кога ќе пополниш цел одговор, точните букви стануваат зелени, а погрешните црвени. „Провери“ ги проверува и делумно внесените одговори. Ако не можеш да го најдеш решението, притисни „Одговори“ за помош.</strong></div>
-  <button class="tool" id="introDone">Прочитав</button>
+<section class="panel intro" id="introPanel" role="dialog" aria-labelledby="introTitle">
+  <div class="intro-text"><strong id="introTitle">Како се игра?</strong>
+  <p>Избери поле и прочитај го прашањето.<br>Внеси го одговорот со тастатурата.</p>
+  <p>Зелените букви се точни, црвените се погрешни.</p>
+  <p>За помош притисни „Одговори“.</p></div>
+  <button class="tool primary" id="introDone">Почни</button>
 </section>
 
 <section class="panel current" aria-live="polite">
@@ -293,66 +304,17 @@ body.game-open #introPanel .intro-text{margin-bottom:15px}
 </main>
 
 <script>
-let ROWS=[
-"#######ПОРОЦИ",
-"#########А###",
-"#С#######Џ###",
-"ТЕЛО##Ч##А###",
-"#Ќ##Н#И##Ј###",
-"НАСЛЕДСТВО###",
-"#В##Б#Т##Г###",
-"ТАТКО#ОКЕАН##",
-"#Њ####Т######",
-"#Е####А######"
-];
-let ANSWERS=[
-{n:1,dir:"across",r:0,c:7,answer:"ПОРОЦИ",clue:"Што треба да ги предадете на Таткото наместо да им дозволите да ве победуваат?"},
-{n:2,dir:"down",r:0,c:9,answer:"РАЏАЈОГА",display:"РАЏА ЈОГА",clue:"Која јога се споменува како јога преку која се станува господар на кралството?"},
-{n:3,dir:"down",r:2,c:1,answer:"СЕЌАВАЊЕ",clue:"На кое духовно патување треба постојано да останеме?"},
-{n:4,dir:"across",r:3,c:0,answer:"ТЕЛО",clue:"Што треба да го надминеме за да ставиме крај на свеста за телото?"},
-{n:5,dir:"down",r:3,c:6,answer:"ЧИСТОТА",clue:"Што треба постојано да се одржува за да се достигне високото духовно наследство?"},
-{n:6,dir:"down",r:4,c:4,answer:"НЕБО",clue:"Како е опишана возвишената дестинација што следи по стекнувањето на наследството?"},
-{n:7,dir:"across",r:5,c:0,answer:"НАСЛЕДСТВО",clue:"Што го добиваат децата од Таткото?"},
-{n:8,dir:"across",r:7,c:0,answer:"ТАТКО",clue:"Од кого децата ја добиваат својата духовна наследба?"},
-{n:9,dir:"across",r:7,c:6,answer:"ОКЕАН",clue:"Каков е Таткото во однос на духовното знаење?"}
-];
-const BUILTIN_CROSSWORD={
- id:"2026-10-01",year:2026,month:10,day:1,title:"10/1",
- rows:ROWS.slice(),
- clues:ANSWERS.map(a=>({...a}))
-};
-const BUILTIN_CROSSWORD_02={
- id:"2026-10-02",year:2026,month:10,day:2,title:"10/2",
- rows:[
-  "#######СВЕТ",
-  "ПОРОЦИ####А",
-  "##А####Ч##Т",
-  "##Џ#С##И##К",
-  "#НАСЛЕДСТВО",
-  "##Ј#У##Т###",
-  "##О#Ж##О###",
-  "##Г#Б##Т###",
-  "ДРАМА#МАЈА#"
- ],
- clues:[
-  {number:3,direction:"across",r:1,c:0,answer:"ПОРОЦИ",clue:"Што не треба да правите следејќи ги упатствата на Раван?"},
-  {number:5,direction:"down",r:2,c:7,answer:"ЧИСТОТА",clue:"Во каква состојба треба да се стане од нечист?"},
-  {number:4,direction:"down",r:1,c:2,answer:"РАЏАЈОГА",display:"РАЏА ЈОГА",clue:"Која јога се практикува за да се стекне висок статус и самосуверенитет?"},
-  {number:6,direction:"down",r:3,c:4,answer:"СЛУЖБА",clue:"Што треба да правите за да им го покажете на другите патот кон чистотата?"},
-  {number:7,direction:"across",r:4,c:1,answer:"НАСЛЕДСТВО",clue:"Што им го дава Таткото на своите деца?"},
-  {number:2,direction:"down",r:0,c:10,answer:"ТАТКО",clue:"Кого треба постојано да го запомнуваме за да ни бидат отсечени гревовите?"},
-  {number:8,direction:"across",r:8,c:0,answer:"ДРАМА",clue:"Што знаат децата дека се повторува точно како во претходниот циклус?"},
-  {number:9,direction:"across",r:8,c:6,answer:"МАЈА",clue:"Кој е опишан како толку моќен што брзо ги заробува децата?"},
-  {number:1,direction:"across",r:0,c:7,answer:"СВЕТ",clue:"Каков нов свет го создава Таткото за време на спојното доба?"}
- ]
-};
+const BUILTIN_CROSSWORD={"type": "murli-crossword", "schemaVersion": 1, "rows": ["#######С#", "####Ш##О#", "ВОЗВИШЕНИ", "####В##Ч#", "#МАЈА##Е#", "#######В#", "###ДРАМА#"], "clues": [{"r": 0, "c": 7, "direction": "down", "answer": "СОНЧЕВА", "clue": "Како се вика династијата од Златното доба?", "number": 1}, {"r": 1, "c": 4, "direction": "down", "answer": "ШИВА", "clue": "Како се вика бестелесниот татко?", "number": 2}, {"r": 2, "c": 0, "direction": "across", "answer": "ВОЗВИШЕНИ", "clue": "Какви упатства од Шриматот следиме?", "number": 3}, {"r": 4, "c": 1, "direction": "across", "answer": "МАЈА", "clue": "Кој ни предизвикува големи грижи?", "number": 4}, {"r": 6, "c": 3, "direction": "across", "answer": "ДРАМА", "clue": "Сѐ што ни се случува, каде е предодредено?", "number": 5}], "id": "2026-10-14", "year": 2026, "month": 10, "day": 14, "title": "10/14"};
+let ROWS=BUILTIN_CROSSWORD.rows.slice();
+let ANSWERS=BUILTIN_CROSSWORD.clues.map(c=>({...c,n:c.number,dir:c.direction}));
+const RETIRED_PUZZLES=new Set(["2026-10-01","2026-10-02"]);
 
 const keyRows=[
  ["Љ","Њ","Е","Р","Т","Ѕ","У","И","О","П","Ш","Ѓ"],
  ["А","С","Д","Ф","Г","Х","Ј","К","Л","Ч","Ќ"],
  ["З","Џ","Ц","В","Б","Н","М","Ж"]
 ];
-let STORAGE="murli-preview-crossword-v2-2026-10-01";
+let STORAGE="murli-preview-crossword-v2-2026-10-14";
 let saved={};
 let active=null, dir="across", activeAnswer=ANSWERS[0];
 
@@ -707,15 +669,33 @@ keyRows.forEach((row,ri)=>{
  });
  kb.appendChild(rowEl);
 });
+const bottomRow=document.querySelector("#keyboard .keyRow.row3");
+const backControl=document.getElementById("back"),deleteControl=document.getElementById("del");
+backControl.textContent="←";backControl.setAttribute("aria-label","Назад");backControl.title="Назад";backControl.classList.add("control-key");
+deleteControl.textContent="⌫";deleteControl.setAttribute("aria-label","Избриши");deleteControl.title="Избриши";deleteControl.classList.add("control-key");
+bottomRow.prepend(backControl);bottomRow.append(deleteControl);
+document.querySelector(".keyboard-actions").remove();
 const intro=document.getElementById("introPanel");
-try{if(localStorage.getItem("murli-preview-intro-seen"))intro.style.display="none";}catch(e){console.warn(e)}
-document.getElementById("introDone").onclick=()=>{try{localStorage.setItem("murli-preview-intro-seen","1");}catch(e){console.warn(e)}intro.remove();};
+try{if(localStorage.getItem("murli-preview-intro-seen-v2"))intro.style.display="none";}catch(e){console.warn(e)}
+document.getElementById("introDone").onclick=()=>{try{localStorage.setItem("murli-preview-intro-seen-v2","1");}catch(e){console.warn(e)}intro.remove();};
 
 const homeScreen=document.getElementById("homeScreen");
 const gameMain=document.getElementById("gameMain");
 const archiveGrid=document.getElementById("archiveGrid");
 const fileInput=document.getElementById("fileInput");
 
+function retireTestPuzzles(){
+  try{
+    for(const key of ["murli-preview-crossword-library","murli-preview-remote-library-v1"]){
+      const raw=localStorage.getItem(key);if(raw===null)continue;
+      const library=JSON.parse(raw);if(!Array.isArray(library))continue;
+      const kept=library.filter(x=>!RETIRED_PUZZLES.has(x?.id));
+      if(kept.length!==library.length)localStorage.setItem(key,JSON.stringify(kept));
+    }
+    for(const id of RETIRED_PUZZLES)localStorage.removeItem(`murli-preview-crossword-v2-${id}`);
+  }catch(e){console.warn("Повлекување на тестни записи:",e);}
+}
+retireTestPuzzles();
 let currentPuzzle=BUILTIN_CROSSWORD;
 function samePuzzleContent(left,right){
   const a=normalizePuzzle(left),b=normalizePuzzle(right);
@@ -740,7 +720,7 @@ function getLibrary(){
   const result=[];
   let invalid=0;
   for(const x of raw){
-    try {result.push(normalizePuzzle(x));}
+    try {const puzzle=normalizePuzzle(x);if(!RETIRED_PUZZLES.has(puzzle.id))result.push(puzzle);}
     catch(e){invalid++;}
   }
   if(invalid){document.getElementById("homeNotice").textContent=`⚠ ${invalid} невалидни локални записи се прескокнати; оригиналот не е избришан.`;}
@@ -750,14 +730,15 @@ function getRemoteLibrary(){
   const raw=readJSONStorage("murli-preview-remote-library-v1",[]);
   if(!Array.isArray(raw))return [];
   const valid=[];
-  for(const puzzle of raw){try{valid.push(normalizePuzzle(puzzle));}catch(e){console.warn("Прескокнат оштетен преземен крстозбор",e);}}
+  for(const puzzle of raw){try{const item=normalizePuzzle(puzzle);if(!RETIRED_PUZZLES.has(item.id))valid.push(item);}catch(e){console.warn("Прескокнат оштетен преземен крстозбор",e);}}
   return valid;
 }
 function getPuzzle(id){
+  if(RETIRED_PUZZLES.has(id))return null;
   const imported=getLibrary().find(x=>x.id===id);
   if(imported) return imported; // A consciously accepted local replacement has priority.
   if(id===BUILTIN_CROSSWORD.id) return BUILTIN_CROSSWORD;
-  if(id===BUILTIN_CROSSWORD_02.id) return BUILTIN_CROSSWORD_02;
+  
   return getRemoteLibrary().find(x=>x.id===id)||null;
 }
 function backupPreviousProgress(id){
@@ -772,7 +753,7 @@ function backupPreviousProgress(id){
     return true;
   } catch(e){console.warn("Резервна копија не успеа",e);return false;}
 }
-function showGame(id="2026-10-01"){
+function showGame(id="2026-10-14"){
   const puzzle=getPuzzle(id);
   if(!puzzle){alert("Крстозборот не е пронајден.");return;}
   currentPuzzle=puzzle;
@@ -796,7 +777,7 @@ function renderArchive(){
   archiveGrid.innerHTML="";
   document.getElementById("continueBtn").disabled=!getPuzzle("2026-10-14");
   const items=new Map();
-  for(const puzzle of [BUILTIN_CROSSWORD,BUILTIN_CROSSWORD_02,...getRemoteLibrary(),...getLibrary()]){
+  for(const puzzle of [BUILTIN_CROSSWORD,...getRemoteLibrary(),...getLibrary()]){
     const x=normalizePuzzle(puzzle);items.set(x.id,x);
   }
   const months=["Јануари","Февруари","Март","Април","Мај","Јуни","Јули","Август","Септември","Октомври","Ноември","Декември"];
@@ -831,6 +812,7 @@ fileInput.addEventListener("change",async()=>{
     if(!records.length || records.length>31)throw new Error("Невалиден пакет.");
     // Validate every item before writing anything, never partially import invalid packages.
     const normalized=records.map(normalizePuzzle);
+    if(normalized.some(x=>RETIRED_PUZZLES.has(x.id)))throw new Error("Овие тестни крстозбори се повлечени.");
     if(new Set(normalized.map(x=>x.id)).size!==normalized.length)throw new Error("Повторен датум во пакетот.");
     const currentRaw=readRawLibrary();
     const library=[];
