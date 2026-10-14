@@ -16,9 +16,9 @@ function fitCrossword(){
  const width=panel.clientWidth-num(panelStyle.paddingLeft)-num(panelStyle.paddingRight);
  const rows=Math.max(7,ROWS.length),cols=Math.max(9,ROWS[0].length),gap=2;
  const minimumBoard=24*rows+gap*(rows-1);
- // Reserve 10% normally; on short screens keep at least 16px before
+ // Reserve 4% normally; on short screens keep at least 8px before
  // allowing the accessible scrolling fallback. Never clip content.
- const reserve=Math.max(8,Math.min(viewportHeight*.10,viewportHeight-reserved-minimumBoard-8));
+ const reserve=Math.max(8,Math.min(viewportHeight*.04,viewportHeight-reserved-minimumBoard-8));
  const height=viewportHeight-reserved-reserve-8;
  const cell=Math.min(42,(width-gap*(cols-1))/cols,(height-gap*(rows-1))/rows);
  // Tiny screens / older oversized puzzles retain readable cells and accessible scrolling.
